@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pocket heart</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Monitoreo de Salud y Bienestar</h1>
+      </header>
+    
+      <nav>
+        <ul>
+          <li><a href="#">Inicio</a></li>
+          <li><a href="#">Perfil</a></li>
+          <li><a href="#">Estadísticas</a></li>
+          <li><a href="#">Configuración</a></li>
+        </ul>
+      </nav>
+    
+      <main>
+    
+        <section id="heart-rate">
+            <h2>Frecuencia Cardíaca</h2>
+            <input type="number" id="heart-rate-input1" placeholder="Ingrese valor">
+        </section>
+        
+        <section id="blood-pressure">
+            <h2>Presión Arterial sistólica</h2>
+            <input type="number" id="systolic-input1" placeholder="Ingrese valor">
+        </section>
+        
+        <section id="blood-pressure2">
+            <h2>Presión Arterial diastólica</h2>
+            <input type="number" id="diastolic-input1" placeholder="Ingrese valor">
+        </section>
+        
+        <section id="oxygen-saturation">
+            <h2>Saturación de Oxígeno</h2>
+            <input type="number" id="oxygen-input1" placeholder="Ingrese valor">
+        </section>
+        
+        <section id="notifications">
+            <h2>Resultados</h2>
+            <p id="result"></p>
+        </section>
+      </main>
+      <script>
+        // Obtener elementos de entrada y resultado
+        const heartRateInput1 = document.getElementById('heart-rate-input1');
+        const systolicInput1 = document.getElementById('systolic-input1');
+        const diastolicInput1 = document.getElementById('diastolic-input1');
+        const oxygenInput1 = document.getElementById('oxygen-input1');
+        const resultElement = document.getElementById('result');
+    
+        // Función para calcular y mostrar el resultado
+        // Función para calcular y mostrar el resultado
+function calcular() {
+    // Obtener los valores de entrada
+    const heartRate = parseFloat(heartRateInput1.value);
+    const systolicPressure = parseFloat(systolicInput1.value);
+    const diastolicPressure = parseFloat(diastolicInput1.value);
+    const oxygenSaturation = parseFloat(oxygenInput1.value);
+
+    // Verificar si todos los valores son válidos
+    if (isNaN(heartRate) || isNaN(systolicPressure) || isNaN(diastolicPressure) || isNaN(oxygenSaturation)) {
+        resultElement.textContent = "Por favor, ingrese valores numéricos válidos en todos los campos.";
+        return;
+    }
+
+    // Calcular la presión arterial media
+    const meanArterialPressure = (systolicPressure + (2 * diastolicPressure)) / 3;
+
+    // Calcular el gasto cardiaco
+    const cardiacOutput = (heartRate * 70) / 1000;
+
+    // Calcular la resistencia vascular periférica
+    const vascularResistance = meanArterialPressure / cardiacOutput;
+
+    // Calcular el flujo volumétrico utilizando Windkessel
+    const flujo = cardiacOutput * (1 - Math.exp(-vascularResistance));
+
+    // Interpretar los resultados
+    let interpretacion = "";
+
+    if (meanArterialPressure < 70 || meanArterialPressure > 110) {
+        interpretacion += "La presión arterial media está fuera del rango saludable.\n";
+    }
+
+    if (cardiacOutput < 4 || cardiacOutput > 8) {
+        interpretacion += "El gasto cardíaco está fuera del rango saludable.\n";
+    }
+
+    if (vascularResistance < 800 || vascularResistance > 1200) {
+        interpretacion += "La resistencia vascular periférica está fuera del rango saludable.\n";
+    }
+
+    if (flujo < 4 || flujo > 8) {
+        interpretacion += "El flujo volumétrico está fuera del rango saludable.\n";
+    }
+
+    if (interpretacion === "") {
+        interpretacion = "Los resultados indican un estado de salud dentro del rango normal.";
+    }
+    // Alerta
+    let alerta = "";
+    if (meanArterialPressure < 70) {
+        alerta += "Riezgo de hipotension.\n";
+    }else if (meanArterialPressure > 110){
+        alerta += "Riezgo de hipertension.\n";
+    }
+
+    if (cardiacOutput < 4) {
+        alerta += "Riezgo de insuficiencia cardíaca o disfunción cardíaca.\n";
+    }else if (cardiacOutput > 8){
+        alerta += "Riezgo de hipertiroidismo o hipervolemia.\n";
+    }
+
+    if (vascularResistance < 800) {
+        alerta += "Riezgo de vasodilatación.\n";
+    }else if (vascularResistance > 1200){
+        alerta += "Riezgo de vasoconstricción y problemas circulatorios.\n";
+    }
+
+    if (flujo < 4) {
+        alerta += "Riezgo de enfermedad cardíaca o arterial.\n";
+    }else if (flujo > 8){
+        alerta += "Flujo fuera de lugar.\n";
+    }
+
+    if(meanArterialPressure > 110 && cardiacOutput > 8 && (flujo < 4 || flujo > 8)){
+        alerta += "RIEZGO DE PARO CARDIACO INMINENTE.\n";
+    }
+
+    if (interpretacion === "") {
+        interpretacion = "Los resultados indican un estado de salud dentro del rango normal.";
+    }
+
+    // Mostrar los resultados y la interpretación
+    resultElement.innerHTML = `
+        Presión Arterial Media: ${meanArterialPressure.toFixed(2)} mmHg<br>
+        Gasto Cardíaco: ${cardiacOutput.toFixed(2)} ml/min<br>
+        Resistencia Vascular Periférica: ${vascularResistance.toFixed(2)} mmHg⋅min/L<br>
+        Flujo volumétrico (Windkessel): ${flujo.toFixed(2)} ml/min<br>
+        <br>
+        <strong>Interpretación:</strong><br>
+        ${interpretacion}
+        <br><br>
+        <strong>ALERTA</strong><br>
+        ${alerta}
+    `;
+}
+    
+        // Escuchar cambios en los campos de entrada y calcular 
+        heartRateInput1.addEventListener('input', calcular);
+        systolicInput1.addEventListener('input', calcular);
+        diastolicInput1.addEventListener('input', calcular);
+        oxygenInput1.addEventListener('input', calcular);
+    </script>
+</body>
+</html>
